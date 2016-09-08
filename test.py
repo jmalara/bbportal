@@ -1,3 +1,5 @@
 #!/usr/bin/python
-print "Content-type: text/html\n\n";
-print("yesy")
+# -*- coding: UTF-8 -*-# enable debugging
+import cgitb
+cgitb.enable()    print("Content-Type: text/html;charset=utf-8")
+print()    print("Hello World!")
