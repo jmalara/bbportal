@@ -1,16 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Flask Template Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <style type="text/css">
+      .container {
+        max-width: 500px;
+        padding-top: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <p>My string: {{my_string}}</p>
+      <p>Value from the list: {{my_list[3]}}</p>
+      <p>Loop through the list:</p>
+      <ul>
+        {% for n in my_list %}
+        <li>{{n}}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+  </body>
+</html>
+Save this as template.html in the templates directory. Notice the template tags. Can you guess the output before you run the app?
+
+Run:
+
+$ python run.py
+You should see:
+
+flask-jinja
+
+It’s worth noting that Jinja only supports a few control structures – if-statements and for-loops are the two primary structures. The syntax is similar to Python, differing in that no colon is required and that termination of the block is done using an endif or endfor instead of by whitespace. You can also complete the logic within your controller or views and then pass each value to the template using the template tags. However, it is much easier to perform such logic within the templates themselves.
+Template Inheritance
+Templates usually take advantage of inheritance, which includes a single base template that defines the basic structure of all subsequent child templates. You use the tags {% extends %} and {% block %} to implement inheritance.
+
+The use case for this is simple: as your application grows, and you continue adding new templates, you will need to keep common code (like a HTML navigation bar, Javascript libraries, CSS stylesheets, and so forth) in sync, which can be a lot of work. Using inheritance, we can move those common pieces to a parent/base template so that we can create or edit such code once and all child templates will inherent that code.
+
+You should always add as much recurring code as possible to your base template to save yourself time in the future, which will far outweigh the initial time investment.
+Let’s add inheritance to our example.
+
+Create the base (or parent) template:
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Flask Template Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <style type="text/css">
+      .container {
+        max-width: 500px;
+        padding-top: 100px;
+      }
+      h2 {color: red;}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>This is part of my base template</h2>
+      <br>
+      {% block content %}{% endblock %}
+      <br>
+      <h2>This is part of my base template</h2>
+    </div>
+    <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+  </body>
+</html>
+Save this as layout.html.
+
+Did you notice the {% block %} tags? This defines a block (or area) that child templates can fill in. Further, this just informs the templating engine that a child template may override the block of the template.
+
+Think of these as placeholders to be filled in by code from the child template(s).
+Let’s do that.
+
+Update template.html:
+
 {% extends "layout.html" %}
-{% block title %}{{title}}{% endblock %}
-{% block head %}
-  {{ super() }}
-{% endblock %}
-{% block page %}{{title}}{% endblock %}
-{% block heading %}
-  {{ super() }}
-{% endblock %}
 {% block content %}
   <h3> This is the start of my child template</h3>
-  <br>
-  <h4>Current date/time: {{ current_time | datetimefilter }}</h4>
   <br>
   <p>My string: {{my_string}}</p>
   <p>Value from the list: {{my_list[3]}}</p>
@@ -20,10 +93,54 @@
     <li>{{n}}</li>
     {% endfor %}
   </ul>
-  <br>
-  <p>Same list with a filter: {{ my_list|join(', ') }}</p>
   <h3> This is the end of my child template</h3>
-  {% block footer %}
-  {{super()}}
-  {% endblock %}
 {% endblock %}
+So, the {% extends %} informs the templating engine that this template “extends” another template, layout.html. This establishes the link between the templates, in other words.
+
+Run it. You should see:
+
+flask-jinja2
+
+One common use case is to add a navigation bar.
+
+Add the following code to the base template, just after the opening <body> tag:
+
+<nav class="navbar navbar-inverse" role="navigation">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Jinja!</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Link</a></li>
+        <li><a href="#">Link</a></li>
+      </ul>
+      <form class="navbar-form navbar-left" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search">
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#">Link</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li><a href="#">Action</a></li>
+            <li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>
+            <li class="divider"></li>
+            <li><a href="#">Separated link</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
